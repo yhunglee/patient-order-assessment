@@ -1,6 +1,6 @@
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-const nextConfig = {
-  turbopack: { root: path.join(__dirname, '..') },
-};
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const nextConfig = { turbopack: { root: projectRoot } };
 export default nextConfig;
