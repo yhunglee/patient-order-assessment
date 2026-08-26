@@ -2,6 +2,24 @@
 
 以 **React (Next.js) + Material UI、Node.js + Express、PostgreSQL** 實作的 Patient／Order 技術前測專案。
 
+## 功能畫面預覽
+
+### 病人清單
+
+![病人清單與目前醫囑狀態](screenshots/list-patients.png)
+
+### 查看目前醫囑與歷史版本
+
+![醫囑唯讀畫面與歷史醫囑](screenshots/order-detail.png)
+
+### 新增、編輯與儲存醫囑
+
+![新增醫囑](screenshots/order-creating.png)
+
+![編輯醫囑](screenshots/order-editing.png)
+
+![儲存成功後顯示最新醫囑與建立時間](screenshots/order-saved.png)
+
 ## 功能
 
 - 顯示固定 seed 的 5 位 Patient。
