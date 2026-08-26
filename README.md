@@ -90,10 +90,10 @@ npm run build --prefix frontend
 
 ## GitHub 發布（Public）
 
-此 repo 設計為 Public，方便 reviewer clone。由 repo owner 在 GitHub 建立空白的 `patient-order-assessme` public repository 後：
+此 repo 設計為 Public，方便 reviewer clone。由 repo owner 在 GitHub 建立空白的 `patient-order-assessment` public repository 後：
 
 ```bash
-git remote add origin https://github.com/<OWNER>/patient-order-assessme.git
+git remote add origin https://github.com/<OWNER>/patient-order-assessment.git
 git branch -M main
 git push -u origin main
 ```
