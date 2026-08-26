@@ -119,7 +119,8 @@ export function OrderDialog({ patient, onClose, onSaved }: Props) {
             setSuccessMessage(null);
             setIsEditing(true);
           }}
-          disabled={isSaving}
+          // 表單已開啟時不可重複觸發編輯／新增，避免重設使用者正在輸入的內容。
+          disabled={isSaving || isEditing || !hasOrder}
           sx={{ position: "absolute", right: 48, top: 12 }}
         >
           {hasOrder ? "編輯" : "新增醫囑"}
