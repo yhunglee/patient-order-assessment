@@ -56,7 +56,7 @@ npm run dev
 docker compose up --build
 ```
 
-首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient 與 3 筆 Order。
+首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient 與 5 筆 Order；每位 Patient 各有一筆可編輯的初始醫囑。
 
 驗收後停止：
 

@@ -14,11 +14,13 @@ CREATE TABLE IF NOT EXISTS patients (
 INSERT INTO orders (id, message) VALUES
   (1, '超過120請施打8u'),
   (2, '每日早晨量測血壓並記錄'),
-  (3, '晚餐採低鈉飲食')
+  (3, '晚餐採低鈉飲食'),
+  (4, '午餐後協助進行15分鐘復健運動'),
+  (5, '睡前量測血糖並記錄')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO patients (id, name, order_id) VALUES
-  ('1', '小民', 1), ('2', '小美', 2), ('3', '阿明', 3), ('4', '小華', NULL), ('5', '阿芳', NULL)
+  ('1', '小民', 1), ('2', '小美', 2), ('3', '阿明', 3), ('4', '小華', 4), ('5', '阿芳', 5)
 ON CONFLICT (id) DO NOTHING;
 
 SELECT setval('orders_id_seq', (SELECT COALESCE(MAX(id), 1) FROM orders));
