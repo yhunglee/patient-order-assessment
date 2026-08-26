@@ -8,3 +8,10 @@ test('API client provides list, create, and update operations', async () => {
   assert.match(source, /createOrder/);
   assert.match(source, /updateOrder/);
 });
+
+test('usePatients exposes whether the most recent patient load succeeded', async () => {
+  const source = await readFile(new URL('../hooks/usePatients.ts', import.meta.url), 'utf8');
+  assert.match(source, /const \[isLoaded, setIsLoaded\] = useState\(false\)/);
+  assert.match(source, /setIsLoaded\(true\)/);
+  assert.match(source, /return \{ patients, isLoading, isLoaded, error, reload: load \}/);
+});
