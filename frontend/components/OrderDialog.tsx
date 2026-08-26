@@ -151,20 +151,32 @@ export function OrderDialog({ patient, onClose, onSaved }: Props) {
           />
         ) : (
           <Stack spacing={1.5}>
-            <Box sx={{ minHeight: 120, whiteSpace: "pre-wrap", color: "text.primary" }}>
+            <Box
+              sx={{
+                minHeight: 120,
+                whiteSpace: "pre-wrap",
+                color: "text.primary",
+              }}
+            >
               {currentOrder?.message}
             </Box>
             <Typography variant="body2" color="text.secondary">
               建立時間：{formatCreatedAt(currentOrder!.createdAt)}
             </Typography>
             <Divider />
-            <Accordion disableGutters elevation={0} sx={{ "&:before": { display: "none" } }}>
+            <Accordion
+              disableGutters
+              elevation={0}
+              sx={{ "&:before": { display: "none" } }}
+            >
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="order-history-content"
                 id="order-history-header"
               >
-                <Typography fontWeight={600}>歷史醫囑（{historicalOrders.length} 筆）</Typography>
+                <Typography fontWeight={600}>
+                  歷史醫囑（{historicalOrders.length} 筆）
+                </Typography>
               </AccordionSummary>
               <AccordionDetails id="order-history-content" sx={{ px: 0 }}>
                 {historicalOrders.length === 0 ? (
@@ -172,9 +184,17 @@ export function OrderDialog({ patient, onClose, onSaved }: Props) {
                 ) : (
                   <List disablePadding aria-label="歷史醫囑列表">
                     {historicalOrders.map((order, index) => (
-                      <ListItem key={order.id} divider={index < historicalOrders.length - 1} alignItems="flex-start">
+                      <ListItem
+                        key={order.id}
+                        divider={index < historicalOrders.length - 1}
+                        alignItems="flex-start"
+                      >
                         <ListItemText
-                          primary={<Typography sx={{ whiteSpace: "pre-wrap" }}>{order.message}</Typography>}
+                          primary={
+                            <Typography sx={{ whiteSpace: "pre-wrap" }}>
+                              {order.message}
+                            </Typography>
+                          }
                           secondary={`建立時間：${formatCreatedAt(order.createdAt)}`}
                         />
                       </ListItem>
@@ -198,8 +218,16 @@ export function OrderDialog({ patient, onClose, onSaved }: Props) {
           >
             取消
           </Button>
-          <Button variant="contained" onClick={() => void save()} disabled={isSaving}>
-            {isSaving ? <CircularProgress color="inherit" size={20} /> : "回存醫囑"}
+          <Button
+            variant="contained"
+            onClick={() => void save()}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              "回存醫囑"
+            )}
           </Button>
         </DialogActions>
       )}
