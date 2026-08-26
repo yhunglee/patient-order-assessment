@@ -5,21 +5,23 @@
 ## 功能
 
 - 顯示固定 seed 的 5 位 Patient。
-- 點選 Patient 後開啟 Dialog，查看目前的 Order。
-- Dialog 右上角依資料狀態提供 **新增 Order** 或 **編輯** 操作。
+- 點選 Patient 後開啟 Dialog，查看目前最新的 Order 與建立時間。
+- Dialog 右上角依資料狀態提供 **新增醫囑** 或 **編輯** 操作。
+- 儲存修改時不會覆寫既有資料，而是建立一筆新的醫囑版本；儲存成功後立即顯示最新醫囑與時間。
+- 唯讀模式提供預設收合的「歷史醫囑」列表，依建立日期／時間由新到舊排列。
 - Order 可回存；前後端皆驗證內容不可空白、長度最多 500 字。
 - 手機、平板與桌面 RWD：清單使用 `xs=12 / sm=6 / md=4`，Dialog 在窄螢幕維持可用邊界與大型點擊區。
-- Express 採 route + repository 分層；資料庫使用 transaction 保護新增 Order 與 Patient 關聯更新。
+- Express 採 route + repository 分層；資料庫使用 transaction 保護醫囑版本新增作業。
 
 ## 資料模型與題意解讀
 
-題目提供的格式為 `patients[].OrderId`（單一 scalar），而非 orders array 或 linking table。因此本專案實作為：
+本功能調整為病人與醫囑的一對多關係：
 
 ```text
-Patient 0..1 ── 1 Order
+Patient 1 ── 0..N Order
 ```
 
-一位 Patient 只有一筆「目前有效」的 Order。尚未有 Order 時，右上角顯示「新增 Order」；已有 Order 時顯示「編輯」。`patients.order_id` 使用 foreign key 與 `UNIQUE` constraint，讓資料庫也維持這個規則，而非僅由前端控制。
+`orders.patient_id` 是外鍵。每次新增或修改都會新增一筆 `orders` 資料，既有醫囑不會被覆寫；依 `created_at DESC, id DESC` 的第一筆為目前最新醫囑，其餘即為歷史紀錄。
 
 ## 架構
 
@@ -56,7 +58,9 @@ npm run dev
 docker compose up --build
 ```
 
-首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient 與 5 筆 Order；每位 Patient 各有一筆可編輯的初始醫囑。
+首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient 與 5 筆初始 Order；每位 Patient 各有一筆初始醫囑。
+
+> 已使用舊版 `patients.order_id` schema 的資料庫，請在部署新版後先執行 `db/migrations/001_patient_order_history.sql`。此 migration 會保留既有醫囑、補上 `orders.patient_id`，並移除舊的一對一關聯。
 
 驗收後停止：
 
@@ -76,9 +80,9 @@ docker compose up --build
 - `GET /health`
 - `GET /api/patients`
 - `POST /api/patients/:patientId/orders` body: `{ "message": "..." }`
-- `PUT /api/orders/:orderId` body: `{ "message": "..." }`
+- `PUT /api/orders/:orderId` body: `{ "message": "..." }`（建立新的醫囑版本，不覆寫原資料）
 
-回應錯誤使用適當 HTTP status：驗證失敗 `400`、不存在 `404`、對已有醫囑的 Patient 再新增 `409`。
+回應錯誤使用適當 HTTP status：驗證失敗 `400`、不存在 `404`。
 
 ## 驗證
 
