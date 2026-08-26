@@ -58,7 +58,7 @@ npm run dev
 docker compose up --build
 ```
 
-首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient 與 5 筆初始 Order；每位 Patient 各有一筆初始醫囑。
+首次建立 PostgreSQL volume 時會自動執行 `db/init.sql`，產生 5 位 Patient，且僅小民有 1 筆初始 Order；其餘病人可從 Dialog 新增醫囑。
 
 > 已使用舊版 `patients.order_id` schema 的資料庫，請在部署新版後先執行 `db/migrations/001_patient_order_history.sql`。此 migration 會保留既有醫囑、補上 `orders.patient_id`，並移除舊的一對一關聯。
 

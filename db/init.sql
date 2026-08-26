@@ -19,11 +19,7 @@ INSERT INTO patients (id, name) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO orders (id, patient_id, message) VALUES
-  (1, '1', '超過120請施打8u'),
-  (2, '2', '每日早晨量測血壓並記錄'),
-  (3, '3', '晚餐採低鈉飲食'),
-  (4, '4', '午餐後協助進行15分鐘復健運動'),
-  (5, '5', '睡前量測血糖並記錄')
+  (1, '1', '超過120請施打8u')
 ON CONFLICT (id) DO NOTHING;
 
 SELECT setval('orders_id_seq', (SELECT COALESCE(MAX(id), 1) FROM orders));
