@@ -53,7 +53,7 @@ Browser
 
 ## 本機開發（Docker Desktop 尚未可用時）
 
-需要 Node `20.19.6`（專案 `.nvmrc` 已指定）。
+需要 Node `24.22.1`（專案 `.nvmrc` 已指定）。
 
 ```bash
 nvm use
@@ -69,6 +69,52 @@ npm run dev
 > 後端須有可連線的 PostgreSQL；可從 `backend/.env.example` 建立 `backend/.env`，填入本機 `DATABASE_URL`。完整可重現資料庫與 seed 的推薦方式是下方 Docker Compose。
 
 ## Docker Compose（正式驗收流程）
+
+Node builder/runtime 使用固定 digest 的 `node:24.22.1-bookworm-slim`（Debian/glibc）；資料庫使用 `postgres:16-bookworm`。
+前後端以非 root 的 `node` 帳號執行，Docker COPY 明確設定檔案擁有者，前端另保留 `.next` 快取寫入權限。
+
+若 npm registry 下載停滯，可選擇提供包含原始 npm `_cacache` 的目錄（不是 `node_modules`）：
+
+```bash
+docker build --build-context npm-cache="$HOME/.npm" \
+  -t patient-order-frontend:node24-debian ./frontend
+```
+
+此選項使用 `npm ci --offline`，保留 lockfile／integrity 驗證；缺少必要 tarball 時會失敗，不會複製主機安裝結果。
+未提供 cache context 時，Compose／一般 build 仍使用線上的 `npm ci`。快取只在安裝層暫存並於同層刪除。
+
+### 從 Alpine 資料庫搬遷：必須 dump / restore
+
+**不可把原 Alpine/musl 的 PostgreSQL data directory 或 volume 直接掛到 Debian/glibc 容器。**
+即使 PostgreSQL major version 同為 16，libc / locale / collation 的差異也可能影響排序與索引。
+Compose 已改用新的 `postgres-data-debian` volume key；不要將它指向舊 volume，也不要刪除舊資料作為搬遷步驟。
+有既有資料時，先在舊資料庫仍正常運作時建立邏輯備份，再安排切換：
+
+```bash
+# 在寫入停止的維護時段執行；替換成現有 Alpine DB container 的真實名稱。
+OLD_DB_CONTAINER=your-existing-alpine-postgres-container
+docker exec "$OLD_DB_CONTAINER" pg_dump -U patient_order -d patient_order -Fc > patient-order-alpine.dump
+# 確認上一行成功，並驗證備份目錄；確認備份安全後才進行切換。
+docker exec -i "$OLD_DB_CONTAINER" pg_restore --list < patient-order-alpine.dump
+
+# 確保這個 project name 尚未使用；不要連接任何既有 volume。
+# 只啟動新 DB，不改動舊服務；新 DB 不對 host 發布 port。
+docker compose -p patient-order-debian-migration up -d --wait postgres
+# 新 volume 會先跑 init.sql；--clean 清除其中的同名 seed 物件，再還原備份。
+docker compose -p patient-order-debian-migration exec -T postgres \
+  pg_restore -U patient_order -d patient_order --clean --if-exists --no-owner --exit-on-error \
+  < patient-order-alpine.dump
+docker compose -p patient-order-debian-migration exec -T postgres \
+  psql -U patient_order -d patient_order -v ON_ERROR_STOP=1 \
+  -c 'ANALYZE; SELECT count(*) AS patients FROM patients; SELECT count(*) AS orders FROM orders;'
+```
+
+確認還原資料與舊 DB 筆數、醫囑歷史及排序一致後，才安排停止舊應用並以同一個新 project name
+啟動 backend/frontend（`docker compose -p patient-order-debian-migration up --build -d`）；
+預設 host ports 3000/4000 必須先釋出或另以 override 調整。保留舊 volume 與 dump 作為回復依據。
+若有自訂資料庫角色，另以 `pg_dumpall --globals-only` 備份並審核／還原所需角色；上述流程針對本專案預設單一角色。
+以下一般啟動指令只適用於全新資料或已規劃好的切換，並非現有 Alpine DB 的直接升級指令。
+
 
 前置：Docker Desktop → **Settings → Resources → WSL Integration** 啟用目前 WSL distro，並重開 WSL shell，確認 `docker --version` 有輸出。
 
